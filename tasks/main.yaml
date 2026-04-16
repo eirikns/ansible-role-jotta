@@ -1,0 +1,100 @@
+---
+- name: Install python3-debian (required for deb822_repository)
+  ansible.builtin.apt:
+    name:
+      - python3-debian
+    update_cache: true
+    state: present
+
+- name: Configure Jotta repository
+  ansible.builtin.deb822_repository:
+    name: jotta
+    types: [deb]
+    uris:
+      - "https://repo.jotta.cloud/debian"
+    suites: [debian]
+    components: [main]
+    signed_by: https://repo.jotta.cloud/jotta.gpg
+    state: present
+    enabled: true
+  register: jotta_repo_status
+
+- name: Install jotta-cli
+  ansible.builtin.apt:
+    name: jotta-cli
+    state: present
+    update_cache: "{{ jotta_repo_status.changed }}"
+
+- name: Get userid of jottad users
+  ansible.builtin.command: "id -u {{ item.name }}"
+  register: jottad_uids
+  changed_when: false
+  failed_when: false
+  loop: "{{ jottad_users }}"
+  when: not ansible_check_mode
+
+- name: Warn about non-existent jottad users
+  ansible.builtin.debug:
+    msg: "Warning: User '{{ item.item.name }}' does not exist, skipping."
+  loop: "{{ jottad_uids.results | default([]) }}"
+  when: item.rc is defined and item.rc != 0 and item.item.state | default('present') == 'present'
+
+- name: Enable lingering for jottad users
+  ansible.builtin.command: "loginctl enable-linger {{ item.item.name }}"
+  args:
+    creates: "/var/lib/systemd/linger/{{ item.item.name }}"
+  when: >-
+    not ansible_check_mode
+    and item.rc == 0
+    and item.item.state | default('present') == 'present'
+    and item.item.linger | default(jottad_linger)
+  loop: "{{ jottad_uids.results | default([]) }}"
+
+- name: Enable jottad for existing users
+  ansible.builtin.systemd:
+    daemon_reload: true
+    enabled: true
+    state: started
+    name: 'jottad.service'
+    scope: user
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ item.stdout }}"
+  become: true
+  become_user: "{{ item.item.name }}"
+  # systemd user service management is broken in Debian 13 containers
+  when: >-
+    not ansible_check_mode
+    and item.rc == 0
+    and item.item.state | default('present') == 'present'
+    and not ansible_facts["virtualization_type"] == 'docker'
+  loop: "{{ jottad_uids.results | default([]) }}"
+
+- name: Disable jottad for absent users
+  ansible.builtin.systemd:
+    daemon_reload: true
+    enabled: false
+    state: stopped
+    name: 'jottad.service'
+    scope: user
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ item.stdout }}"
+  become: true
+  become_user: "{{ item.item.name }}"
+  # systemd user service management is broken in Debian 13 containers
+  when: >-
+    not ansible_check_mode
+    and item.rc == 0
+    and item.item.state | default('present') == 'absent'
+    and not ansible_facts["virtualization_type"] == 'docker'
+  loop: "{{ jottad_uids.results | default([]) }}"
+
+- name: Disable lingering for absent jottad users
+  ansible.builtin.command: "loginctl disable-linger {{ item.item.name }}"
+  args:
+    removes: "/var/lib/systemd/linger/{{ item.item.name }}"
+  when: >-
+    not ansible_check_mode
+    and item.rc == 0
+    and item.item.state | default('present') == 'absent'
+    and item.item.linger | default(jottad_linger)
+  loop: "{{ jottad_uids.results | default([]) }}"

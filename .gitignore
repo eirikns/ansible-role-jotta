@@ -1,0 +1,8 @@
+# Editors and IDEs
+*~
+*.iml
+.idea
+.vscode
+
+# Ansible managed directories
+.ansible/

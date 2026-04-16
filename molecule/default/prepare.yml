@@ -1,0 +1,15 @@
+---
+- name: Prepare
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Add users for jotta
+      ansible.builtin.user:
+        name: "{{ item }}"
+        comment: "Jotta test user"
+        state: present
+      loop:
+        - jottauser1
+        - jottauser2
+        - nonjottauser

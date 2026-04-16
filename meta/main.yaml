@@ -1,0 +1,17 @@
+---
+dependencies: []
+
+galaxy_info:
+  role_name: "jotta"
+  author: "eirikns"
+  description: |
+    Install jotta cloud backup on Debian/Ubuntu.
+  license: "MIT"
+  min_ansible_version: "2.16"
+  platforms:
+    - name: Debian
+      versions:
+        - all
+    - name: Ubuntu
+      versions:
+        - all

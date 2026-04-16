@@ -1,0 +1,23 @@
+---
+# List of user entries for which the jottad backup daemon is managed.
+# Each entry must have a 'name' key (local username) and a 'state' key
+# ('present' to enable jottad, 'absent' to stop and disable it).
+# Users that do not exist on the target host are skipped (present users
+# produce a warning; absent users are skipped silently).
+#
+# An optional per-user 'linger' key overrides the global jottad_linger
+# setting for that specific user.
+jottad_users: []
+#   - name: alice
+#     state: present
+#   - name: bob
+#     state: present
+#     linger: false   # disable lingering for bob only
+#   - name: john
+#     state: absent
+
+# Whether to manage loginctl lingering for jottad users. When true, lingering
+# is enabled for present users and disabled for absent users. Set to false if
+# lingering is managed externally or enabled for the user for other purposes.
+# Can be overridden per user with a 'linger' key in the jottad_users entry.
+jottad_linger: true

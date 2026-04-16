@@ -1,0 +1,19 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+
+  vars:
+    jottad_users:
+      - name: jottauser1
+        state: present
+      - name: jottauser2
+        state: present
+        linger: false
+      - name: nonexistentuser
+        state: absent
+      - name: nonjottauser
+        state: absent
+
+  roles:
+    - role: eirikns.jotta
