@@ -5,13 +5,17 @@ galaxy_info:
   role_name: "jotta"
   author: "eirikns"
   description: |
-    Install jotta cloud backup on Debian/Ubuntu.
-  license: "MIT"
+    Install jotta cloud backup cli command on Debian and Ubuntu.
+  license: "MIT No Attribution"
   min_ansible_version: "2.16"
   platforms:
     - name: Debian
       versions:
-        - all
+        - trixie
     - name: Ubuntu
       versions:
-        - all
+        - noble
+  galaxy_tags:
+    - backup
+    - jotta
+    - jottacloud
