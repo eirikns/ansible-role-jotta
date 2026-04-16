@@ -46,7 +46,13 @@ See `defaults/main.yaml` for a full list of values.
 ```
 
 # License
+
 [MIT No Attribution](https://opensource.org/license/mit-0)
 
 # Author
+
 This Ansible role was created in 2025 by Eirik Nicolai Synnes and published as an Open Source project in 2026.
+
+# Acknowledgements
+
+This role uses Docker images created by Jeff Geerling for testing. The approach for developing this role, as well how to use GitHub Actions to manage it, is inspired by his work. You can find him on GitHub at https://github.com/geerlingguy.
