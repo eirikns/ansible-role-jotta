@@ -1,4 +1,14 @@
 ---
+- name: Validate jottad_users entries
+  ansible.builtin.assert:
+    that:
+      - item.name is defined and item.name | length > 0
+      - item.state is defined and item.state in ['present', 'absent']
+    fail_msg: >-
+      jottad_users entry is invalid: each item must have a non-empty 'name'
+      and a 'state' of 'present' or 'absent'. Got: {{ item }}
+  loop: "{{ jottad_users }}"
+
 - name: Install python3-debian (required for deb822_repository)
   ansible.builtin.apt:
     name:
