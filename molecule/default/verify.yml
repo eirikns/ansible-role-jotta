@@ -1,0 +1,45 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Check linger file exists for present user with linger enabled
+      ansible.builtin.stat:
+        path: "/var/lib/systemd/linger/jottauser1"
+      register: linger_jottauser1
+
+    - name: Assert jottauser1 has lingering enabled
+      ansible.builtin.assert:
+        that: linger_jottauser1.stat.exists
+        fail_msg: "Expected linger file for jottauser1 to exist"
+
+    - name: Check linger file absent for present user with linger disabled
+      ansible.builtin.stat:
+        path: "/var/lib/systemd/linger/jottauser2"
+      register: linger_jottauser2
+
+    - name: Assert jottauser2 does not have lingering enabled
+      ansible.builtin.assert:
+        that: not linger_jottauser2.stat.exists
+        fail_msg: "Expected linger file for jottauser2 to be absent (linger: false)"
+
+    - name: Check linger file absent for non-existent absent user
+      ansible.builtin.stat:
+        path: "/var/lib/systemd/linger/nonexistentuser"
+      register: linger_nonexistentuser
+
+    - name: Assert nonexistentuser has no linger file
+      ansible.builtin.assert:
+        that: not linger_nonexistentuser.stat.exists
+        fail_msg: "Expected linger file for nonexistentuser to be absent"
+
+    - name: Check linger file absent for existing absent user
+      ansible.builtin.stat:
+        path: "/var/lib/systemd/linger/nonjottauser"
+      register: linger_nonjottauser
+
+    - name: Assert nonjottauser has no linger file
+      ansible.builtin.assert:
+        that: not linger_nonjottauser.stat.exists
+        fail_msg: "Expected linger file for nonjottauser to be absent"
